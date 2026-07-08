@@ -2,6 +2,7 @@ import time
 from datetime import datetime, timedelta
 import threading
 import os
+import hashlib
 
 users = {}
 appointments = {}
@@ -10,7 +11,8 @@ status = None
 notification_sent = False
 
 file_lock = threading.Lock()
-file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log.txt")
+log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log.txt")
+user_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user_db.txt")
 
 movies = {
    "Inception": {
@@ -39,15 +41,22 @@ theater_seats = [
 ]
 
 current_user = None
+   
 
-def Database(info):
+def Database(info, user_name=None, user_pass=None):
    with file_lock:
       try:
          timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
-         with open(file_path, "a", encoding="utf-8") as file:
+         with open(log_path, "a", encoding="utf-8") as file:
             print(f"[{timestamp}] {info}", file=file)
             file.flush()
             os.fsync(file.fileno())
+
+         if user_name is not None and user_pass is not None:
+            with open(user_db_path, "a", encoding="utf-8") as user_db_file:
+               print(f"[{timestamp}] {user_name} : {user_pass}", file=user_db_file)
+               user_db_file.flush()
+               os.fsync(user_db_file.fileno())
       except Exception as e:
          print(f"Error! : {e}")
 
@@ -79,7 +88,7 @@ def Register():
    try:
       name = input("Enter your name: ").strip()
       age = int(input("Enter your age: "))
-      password = int(input("Enter your password: "))
+      password = input("Enter your password: ")
 
       if not name or not age or not password:
          print("Please do not leave any fields empty!")
@@ -92,16 +101,27 @@ def Register():
       elif age < 18:
          print("Users under the age of 18 are not allowed to log in.")
          return
+      
+      hashed_pass = hash_password(password)
 
       users[name] = {
-         "password": password,
+         "password": hashed_pass,
          "age": age
       }
 
-      Database(f"[Registration] -> {name}")
+      Database(f"[Registration] -> {name}", user_name=name, user_pass=hashed_pass)
 
    except ValueError:
       print("Error! Please enter a valid number.")
+
+
+def hash_password(password):
+   try:
+      byte_password = password.encode('utf-8')
+      hash_password = hashlib.sha256(byte_password).hexdigest()
+      return hash_password
+   except Exception as e:
+      print(f"Error! : {e}")
 
 
 def Login():
@@ -111,13 +131,15 @@ def Login():
       print("-----Login Page-----")
 
       name = input("Enter your name: ").strip()
-      password = int(input("Enter your password: "))
+      password = input("Enter your password: ")
+
+      hashed_pass = hash_password(password)
 
       if name not in users:
          print("User not found. Please register first.")
          return
 
-      elif users[name]["password"] != password:
+      elif users[name]["password"] != hashed_pass:
          print("Incorrect password!")
          return
 
