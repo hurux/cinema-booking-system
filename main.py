@@ -104,9 +104,12 @@ def Register():
       
       hashed_pass = hash_password(password)
 
+      account_creation_date = datetime.now().strftime("%d/%m/%Y %H:%M")
+
       users[name] = {
          "password": hashed_pass,
-         "age": age
+         "age": age,
+         "account_creation_date": account_creation_date
       }
 
       Database(f"[Registration] -> {name}", user_name=name, user_pass=hashed_pass)
@@ -183,13 +186,28 @@ def cinema_information():
             f"Sessions: {details['sessions']} - "
             f"Dates: {details['dates']} - "
             f"Price: {details['price']}"
-            )
+         )
 
       Database(f"[Cinema Information] -> {current_user}")
 
    except Exception as e:
       print(f"Error! : {e}")
 
+def user_information():
+   global current_user
+
+   try:
+      if current_user is None:
+         print("Please log in first.")
+      for name, details in users.items():
+         print(
+            f"Name: {name} - \n"
+            f"Password: {details['password']} - \n"
+            f"Account Creation Date: {details['account_creation_date']}"
+         )
+      
+   except Exception as e:
+      print(f"Error! : {e}")
 
 def fifteen_day_check():
    if current_user not in appointments or "appointment_date" not in appointments[current_user]:
@@ -404,7 +422,8 @@ if __name__ == "__main__":
       print("4. Show Movies")
       print("5. Create Ticket / Appointment")
       print("6. View Appointment Report")
-      print("7. Cancel Appointment")
+      print("7. View User İnformation")
+      print("8. Cancel Appointment")
       print("0. Exit Program")
       print("======================================")
 
@@ -429,6 +448,9 @@ if __name__ == "__main__":
          appointment_report()
 
       elif choice == "7":
+         user_information()
+
+      elif choice == "8":
          cancel_appointment()
 
       elif choice == "0":
