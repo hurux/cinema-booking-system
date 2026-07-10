@@ -199,6 +199,8 @@ def user_information():
    try:
       if current_user is None:
          print("Please log in first.")
+         return
+      
       for name, details in users.items():
          print(
             f"Name: {name} - \n"
