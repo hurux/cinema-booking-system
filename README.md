@@ -14,6 +14,7 @@ This project simulates a movie ticket reservation system featuring cryptographic
 - 🎟️ **Dynamic Movie Listing:** Displays available sessions, real-time dates, and ticket pricing.
 - 💺 **Interactive Seat Selection:** A simulated 5x5 cinema hall grid management (`theater_seats`).
 - ⛔ **Business Logic Constraints:** Age restriction check (18+) during sign-up and a strict 15-day booking limitation rule.
+- 👤 **User Information:** Fetches GitHub user profiles and lists account details like creation date and credentials.
 
 ---
 
